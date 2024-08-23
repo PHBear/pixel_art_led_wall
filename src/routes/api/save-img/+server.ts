@@ -15,8 +15,6 @@ export const post: RequestHandler<SaveImagePayload> = async (request) => {
     const filePath = path.join(pathToStoreFile, payload.fileName + '.json');
     fs.writeFileSync(filePath, JSON.stringify(payload.grid));
 
-
-    // Respond with HTTP 200 OK and some information
     return {
         status: 200,
         body: {
