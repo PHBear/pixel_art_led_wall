@@ -81,7 +81,7 @@
   }
 
   
-  function onSubmitForm(e: SubmitEvent) {
+  async function onSubmitForm(e: SubmitEvent) {
     const formData = new FormData(e.target as HTMLFormElement);
 	const data: any = {};
     for (let field of formData) {
@@ -96,8 +96,20 @@
 			(document.getElementById("nameControl")! as HTMLInputElement).value = '';
 		}
 		saveFormValidationMessage = '';
+		// date string with yy-mm-DD-HH-mm
+		const date = new Date();
+		const dateString = `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}-${date.getHours()}-${date.getMinutes()}`;
+		const fileName = `${dateString}-${name}`;
 		
-		//TODO: POST request to backend saving the data from the grid variable
+		const saveEndpoint = '/api/save-img'
+		const saveResponse = await fetch(saveEndpoint, {
+			method: 'POST',
+			body: JSON.stringify({
+				fileName,
+				grid
+			})
+		})
+		console.log(await saveResponse.json());
 		dialog?.close();
 	}
   }
