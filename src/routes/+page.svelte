@@ -16,14 +16,18 @@
     a: 100,
   };
 
+  function getEmptyGrid() {
+	return Array(40)
+	  .fill(null)
+	  .map(() =>
+		Array(25)
+		  .fill(null)
+		  .map(() => ({ r: 255, g: 255, b: 255, a: 100 }))
+	  );
+  }
+
   // grid is a 2 dimensional array of size 40 x 25 of RGB values
-  let grid: RGB[][] = Array(40)
-    .fill(null)
-    .map(() =>
-      Array(25)
-        .fill(null)
-        .map(() => ({ r: 255, g: 255, b: 255, a: 100 }))
-    );
+  let grid: RGB[][] = getEmptyGrid();
 
   function paintCell(i: number, j: number) {
     console.log(i, j);
@@ -48,6 +52,9 @@
     }
   }
 
+  function clearCanvas() {
+	grid = getEmptyGrid();
+  }
 
   let saveFormValidationMessage = '';
 
@@ -117,7 +124,10 @@
 
 <div class="controls">
   <ColorPicker bind:rgb position="responsive" />
-  <button class="save-button btn-primary" on:click={openSaveImageModal}
+  <button class="clear-button btn-large" on:click={clearCanvas}
+    >Clear</button
+  >
+  <button class="save-button btn-primary btn-large" on:click={openSaveImageModal}
     >Save</button
   >
 </div>
@@ -161,7 +171,7 @@
 	{#if saveFormValidationMessage}
 		<p style="color: red">{saveFormValidationMessage}</p>
 	{/if}
-    <button type="submit" class="btn-primary">Save</button>
+    <button type="submit" class="btn-primar btn-large">Save</button>
   </form>
 </dialog>
 
@@ -172,11 +182,13 @@
   button {
     border-radius: 5px;
   }
-  .btn-primary {
-    background: greenyellow;
-    height: 36px;
+  .btn-large {
+	height: 36px;
     font-size: 16px;
     padding: 6px 20px;
+  }
+  .btn-primary {
+    background: greenyellow;    
   }
   .saveImageForm input {
     font-size: 20px;
@@ -202,8 +214,6 @@
   .controls {
     display: flex;
     height: 40px;
-  }
-  .save-button {
-    margin-left: 330px;
+	justify-content: space-evenly;
   }
 </style>
