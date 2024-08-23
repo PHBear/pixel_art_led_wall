@@ -49,23 +49,23 @@
   }
 
   function getSaveModal() {
-	let dialog: HTMLDialogElement | null = null;
-	if (browser) {
-		dialog = document.getElementById("dialog")! as HTMLDialogElement;
-		dialog.addEventListener("click", (event) => {
-		let rect = (event!.target! as any).getBoundingClientRect();
-		const isClickOnBackDrop =
-			rect.left > event.clientX ||
-			rect.right < event.clientX ||
-			rect.top > event.clientY ||
-			rect.bottom < event.clientY;
-		if (isClickOnBackDrop) {
-			dialog!.close();
-		}
-		});
-		return dialog;
-	}
-	return null;
+    let dialog: HTMLDialogElement | null = null;
+    if (browser) {
+      dialog = document.getElementById("dialog")! as HTMLDialogElement;
+      dialog.addEventListener("click", (event) => {
+        let rect = (event!.target! as any).getBoundingClientRect();
+        const isClickOnBackDrop =
+          rect.left > event.clientX ||
+          rect.right < event.clientX ||
+          rect.top > event.clientY ||
+          rect.bottom < event.clientY;
+        if (isClickOnBackDrop) {
+          dialog!.close();
+        }
+      });
+      return dialog;
+    }
+    return null;
   }
 
   let dialog: HTMLDialogElement | null = getSaveModal();
@@ -73,24 +73,24 @@
   function openSaveImageModal() {
     dialog?.showModal();
     console.log(grid);
-  };
-  
+  }
+
   function onSubmitForm(e: SubmitEvent) {
-	const formData = new FormData(e.target as HTMLFormElement);
+    const formData = new FormData(e.target as HTMLFormElement);
 
     const data: any = {};
     for (let field of formData) {
       const [key, value] = field;
       data[key] = value;
     }
-	console.log(data);
-	dialog?.close();
+    console.log(data);
+    dialog?.close();
   }
 </script>
 
 <div class="controls">
   <ColorPicker bind:rgb position="responsive" />
-  <button class="save-button" on:click={openSaveImageModal}>Save</button>
+  <button class="save-button btn-primary" on:click={openSaveImageModal}>Save</button>
 </div>
 
 <div>
@@ -126,18 +126,35 @@
 </div>
 
 <dialog id="dialog">
-	<form on:submit|preventDefault={onSubmitForm}>
-		<label for="name">Name your creation</label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-        />
-		<button type="submit">Save</button>
-	</form>
+  <form on:submit|preventDefault={onSubmitForm} class="saveImageForm">
+    <label for="name">Name your creation</label>
+    <input type="text" id="name" name="name" />
+    <button type="submit" class="btn-primary">Save</button>
+  </form>
 </dialog>
 
 <style>
+  label {
+    display: block;
+  }
+  button {
+	border-radius: 5px;
+  }
+  .btn-primary {
+	background: greenyellow;
+	height: 36px;
+	font-size: 16px;
+    padding: 6px 20px;
+  }
+  .saveImageForm input {
+	font-size: 20px;
+	margin-top: 4px;
+  }
+  .saveImageForm button {
+	display: block;
+	margin: 0 auto;
+	margin-top: 16px;
+  }
   .grid {
     display: inline-block;
     border: 1px solid #ccc;
@@ -155,11 +172,7 @@
     height: 40px;
   }
   .save-button {
-    height: 36px;
     margin-left: 330px;
-    background: greenyellow;
-    font-size: 16px;
-    border-radius: 5px;
-    padding: 6px 20px;
+    
   }
 </style>
