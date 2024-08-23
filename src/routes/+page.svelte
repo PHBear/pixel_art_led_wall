@@ -78,7 +78,6 @@
 
   function openSaveImageModal() {
     dialog?.showModal();
-    console.log(grid);
   }
 
   
@@ -97,6 +96,8 @@
 			(document.getElementById("nameControl")! as HTMLInputElement).value = '';
 		}
 		saveFormValidationMessage = '';
+		
+		//TODO: POST request to backend saving the data from the grid variable
 		dialog?.close();
 	}
   }
