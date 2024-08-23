@@ -1,24 +1,31 @@
-import type { RequestHandler } from '@sveltejs/kit';
+import fs from "fs";
+import path from "path";
 
 interface SaveImagePayload {
-    fileName: string;
-    grid: string;
+  fileName: string;
+  grid: string;
 }
 
-export const post: RequestHandler<SaveImagePayload> = async (request) => {
-    const payload: SaveImagePayload = request.body;
+export async function POST(event) {
+  const input = await event.request.json();
+  if (!input) {
+    return new Response(JSON.stringify({ success: false }), {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  }
 
-    // TODO: include this const pathToStoreFile = '/home/philipp/dev/led-wall/json_pics/';
-    const pathToStoreFile ='./';
-    const fs = require('fs');
-    const path = require('path');
-    const filePath = path.join(pathToStoreFile, payload.fileName + '.json');
-    fs.writeFileSync(filePath, JSON.stringify(payload.grid));
+  const payload = input as SaveImagePayload;
 
-    return {
-        status: 200,
-        body: {
-            message: "Image successfully saved"
-        }
-    };
-};
+  const pathToStoreFile = '/home/philipp/dev/led-wall/json_pics/';
+//   const pathToStoreFile = "./";
+  const filePath = path.join(pathToStoreFile, payload.fileName + ".json");
+  fs.writeFileSync(filePath, JSON.stringify(payload.grid));
+
+  return new Response(JSON.stringify({ success: true }), {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+}
