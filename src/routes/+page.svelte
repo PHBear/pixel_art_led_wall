@@ -1,98 +1,165 @@
 <script lang="ts">
-	import ColorPicker from 'svelte-awesome-color-picker';
+  import ColorPicker from "svelte-awesome-color-picker";
+  import { browser } from "$app/environment";
 
-	type RGB = {
-		r: number;
-		g: number;
-		b: number;
-		a: number;
-	};
+  type RGB = {
+    r: number;
+    g: number;
+    b: number;
+    a: number;
+  };
 
-	let rgb: RGB = {
-		r: 0,
-		g: 0,
-		b: 255,
-		a: 100
-	};
+  let rgb: RGB = {
+    r: 0,
+    g: 0,
+    b: 255,
+    a: 100,
+  };
 
-	// grid is a 2 dimensional array of size 40 x 25 of RGB values
-	let grid: RGB[][] = Array(40)
-		.fill(null)
-		.map(() =>
-			Array(25)
-				.fill(null)
-				.map(() => ({ r: 255, g: 255, b: 255, a: 100 }))
-		);
+  // grid is a 2 dimensional array of size 40 x 25 of RGB values
+  let grid: RGB[][] = Array(40)
+    .fill(null)
+    .map(() =>
+      Array(25)
+        .fill(null)
+        .map(() => ({ r: 255, g: 255, b: 255, a: 100 }))
+    );
 
-	function paintCell(i: number, j: number) {
-		console.log(i, j);
-		console.log(rgb);
-		grid[i][j] = { ...rgb };
-		grid = grid;
-	}
+  function paintCell(i: number, j: number) {
+    console.log(i, j);
+    console.log(rgb);
+    grid[i][j] = { ...rgb };
+    grid = grid;
+  }
 
-	let isMouseDown = false;
+  let isMouseDown = false;
 
-	function handleMouseDown() {
-		isMouseDown = true;
-	}
+  function handleMouseDown() {
+    isMouseDown = true;
+  }
 
-	function handleMouseUp() {
-		isMouseDown = false;
-	}
+  function handleMouseUp() {
+    isMouseDown = false;
+  }
 
-	function handleMouseOver(i: number, j: number) {
-		if (isMouseDown) {
-			paintCell(i, j);
+  function handleMouseOver(i: number, j: number) {
+    if (isMouseDown) {
+      paintCell(i, j);
+    }
+  }
+
+  function getSaveModal() {
+	let dialog: HTMLDialogElement | null = null;
+	if (browser) {
+		dialog = document.getElementById("dialog")! as HTMLDialogElement;
+		dialog.addEventListener("click", (event) => {
+		let rect = (event!.target! as any).getBoundingClientRect();
+		const isClickOnBackDrop =
+			rect.left > event.clientX ||
+			rect.right < event.clientX ||
+			rect.top > event.clientY ||
+			rect.bottom < event.clientY;
+		if (isClickOnBackDrop) {
+			dialog!.close();
 		}
+		});
+		return dialog;
 	}
+	return null;
+  }
+
+  let dialog: HTMLDialogElement | null = getSaveModal();
+
+  function openSaveImageModal() {
+    dialog?.showModal();
+    console.log(grid);
+  };
+  
+  function onSubmitForm(e: SubmitEvent) {
+	const formData = new FormData(e.target as HTMLFormElement);
+
+    const data: any = {};
+    for (let field of formData) {
+      const [key, value] = field;
+      data[key] = value;
+    }
+	console.log(data);
+	dialog?.close();
+  }
 </script>
 
-<ColorPicker bind:rgb position="responsive" />
-
-<div>
-	<div
-		class="grid"
-		on:mousedown={handleMouseDown}
-		on:mouseup={handleMouseUp}
-		on:mouseleave={handleMouseUp}
-		on:touchstart={handleMouseDown}
-		on:touchend={handleMouseUp}
-		on:touchcancel={handleMouseUp}
-		role="button"
-		tabindex="0"
-	>
-		{#each grid as row, i}
-			<div class="row">
-				{#each row as cell, j}
-					<div
-						class="cell"
-						style="background-color: rgba({cell.r}, {cell.g}, {cell.b}, {cell.a})"
-						on:mousedown={() => paintCell(i, j)}
-						on:mouseover={() => handleMouseOver(i, j)}
-            on:focus={() => paintCell(i, j)}
-						on:touchstart={() => paintCell(i, j)}
-						on:touchmove={() => handleMouseOver(i, j)}
-						role="button"
-						tabindex="0"
-					/>
-				{/each}
-			</div>
-		{/each}
-	</div>
+<div class="controls">
+  <ColorPicker bind:rgb position="responsive" />
+  <button class="save-button" on:click={openSaveImageModal}>Save</button>
 </div>
 
+<div>
+  <div
+    class="grid"
+    on:mousedown={handleMouseDown}
+    on:mouseup={handleMouseUp}
+    on:mouseleave={handleMouseUp}
+    on:touchstart={handleMouseDown}
+    on:touchend={handleMouseUp}
+    on:touchcancel={handleMouseUp}
+    role="button"
+    tabindex="0"
+  >
+    {#each grid as row, i}
+      <div class="row">
+        {#each row as cell, j}
+          <div
+            class="cell"
+            style="background-color: rgba({cell.r}, {cell.g}, {cell.b}, {cell.a})"
+            on:mousedown={() => paintCell(i, j)}
+            on:mouseover={() => handleMouseOver(i, j)}
+            on:focus={() => paintCell(i, j)}
+            on:touchstart={() => paintCell(i, j)}
+            on:touchmove={() => handleMouseOver(i, j)}
+            role="button"
+            tabindex="0"
+          />
+        {/each}
+      </div>
+    {/each}
+  </div>
+</div>
+
+<dialog id="dialog">
+	<form on:submit|preventDefault={onSubmitForm}>
+		<label for="name">Name your creation</label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+        />
+		<button type="submit">Save</button>
+	</form>
+</dialog>
+
 <style>
-	.grid {
-		display: inline-block;
-		border: 1px solid #ccc;
-	}
-	.row {
-		display: flex;
-	}
-	.cell {
-		width: 20px;
-		height: 20px;
-		border: 1px solid #eee;
-	}
+  .grid {
+    display: inline-block;
+    border: 1px solid #ccc;
+  }
+  .row {
+    display: flex;
+  }
+  .cell {
+    width: 20px;
+    height: 20px;
+    border: 1px solid #eee;
+  }
+  .controls {
+    display: flex;
+    height: 40px;
+  }
+  .save-button {
+    height: 36px;
+    margin-left: 330px;
+    background: greenyellow;
+    font-size: 16px;
+    border-radius: 5px;
+    padding: 6px 20px;
+  }
 </style>
