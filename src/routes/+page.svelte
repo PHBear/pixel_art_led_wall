@@ -34,7 +34,7 @@
 
   let isMouseDown = false;
 
-  function handleMouseDown() {
+  function handleMouseDown(event: MouseEvent) {
     isMouseDown = true;
   }
 
@@ -48,12 +48,17 @@
     }
   }
 
+
+  let saveFormValidationMessage = '';
+
   function getSaveModal() {
     let dialog: HTMLDialogElement | null = null;
     if (browser) {
       dialog = document.getElementById("dialog")! as HTMLDialogElement;
+
+      // close on backdrop
       dialog.addEventListener("click", (event) => {
-        let rect = (event!.target! as any).getBoundingClientRect();
+        const rect = (event!.target! as any).getBoundingClientRect();
         const isClickOnBackDrop =
           rect.left > event.clientX ||
           rect.right < event.clientX ||
@@ -61,6 +66,7 @@
           rect.bottom < event.clientY;
         if (isClickOnBackDrop) {
           dialog!.close();
+		  saveFormValidationMessage = '';
         }
       });
       return dialog;
@@ -75,22 +81,32 @@
     console.log(grid);
   }
 
+  
   function onSubmitForm(e: SubmitEvent) {
     const formData = new FormData(e.target as HTMLFormElement);
-
-    const data: any = {};
+	const data: any = {};
     for (let field of formData) {
       const [key, value] = field;
       data[key] = value;
     }
-    console.log(data);
-    dialog?.close();
+    const { name } = data;
+	if (name.length < 3) {
+		saveFormValidationMessage = 'Enter at least three characters'
+	} else {
+		if (browser) {
+			(document.getElementById("nameControl")! as HTMLInputElement).value = '';
+		}
+		saveFormValidationMessage = '';
+		dialog?.close();
+	}
   }
 </script>
 
 <div class="controls">
   <ColorPicker bind:rgb position="responsive" />
-  <button class="save-button btn-primary" on:click={openSaveImageModal}>Save</button>
+  <button class="save-button btn-primary" on:click={openSaveImageModal}
+    >Save</button
+  >
 </div>
 
 <div>
@@ -128,7 +144,10 @@
 <dialog id="dialog">
   <form on:submit|preventDefault={onSubmitForm} class="saveImageForm">
     <label for="name">Name your creation</label>
-    <input type="text" id="name" name="name" />
+    <input type="text" id="nameControl" name="name" />
+	{#if saveFormValidationMessage}
+		<p style="color: red">{saveFormValidationMessage}</p>
+	{/if}
     <button type="submit" class="btn-primary">Save</button>
   </form>
 </dialog>
@@ -138,22 +157,22 @@
     display: block;
   }
   button {
-	border-radius: 5px;
+    border-radius: 5px;
   }
   .btn-primary {
-	background: greenyellow;
-	height: 36px;
-	font-size: 16px;
+    background: greenyellow;
+    height: 36px;
+    font-size: 16px;
     padding: 6px 20px;
   }
   .saveImageForm input {
-	font-size: 20px;
-	margin-top: 4px;
+    font-size: 20px;
+    margin-top: 4px;
   }
   .saveImageForm button {
-	display: block;
-	margin: 0 auto;
-	margin-top: 16px;
+    display: block;
+    margin: 0 auto;
+    margin-top: 16px;
   }
   .grid {
     display: inline-block;
@@ -173,6 +192,5 @@
   }
   .save-button {
     margin-left: 330px;
-    
   }
 </style>
